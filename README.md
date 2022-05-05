@@ -1,69 +1,37 @@
-<div align="center">
+## これはなに
+Rust、 React の練習アプリケーション。
 
-  <h1><code>wasm-pack-template</code></h1>
+長方形詰め込み問題を Rust で解き react で描画する。
 
-  <strong>A template for kick starting a Rust and WebAssembly project using <a href="https://github.com/rustwasm/wasm-pack">wasm-pack</a>.</strong>
+## 開発メモ
 
-  <p>
-    <a href="https://travis-ci.org/rustwasm/wasm-pack-template"><img src="https://img.shields.io/travis/rustwasm/wasm-pack-template.svg?style=flat-square" alt="Build Status" /></a>
-  </p>
+### 環境構築
 
-  <h3>
-    <a href="https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html">Tutorial</a>
-    <span> | </span>
-    <a href="https://discordapp.com/channels/442252698964721669/443151097398296587">Chat</a>
-  </h3>
+基本的には以下に従い、開発環境を作成する。
 
-  <sub>Built with 🦀🕸 by <a href="https://rustwasm.github.io/">The Rust and WebAssembly Working Group</a></sub>
-</div>
+https://tkat0.github.io/posts/how-to-create-a-react-app-with-rust-and-wasm
 
-## About
-
-[**📚 Read this template tutorial! 📚**][template-docs]
-
-This template is designed for compiling Rust libraries into WebAssembly and
-publishing the resulting package to NPM.
-
-Be sure to check out [other `wasm-pack` tutorials online][tutorials] for other
-templates and usages of `wasm-pack`.
-
-[tutorials]: https://rustwasm.github.io/docs/wasm-pack/tutorials/index.html
-[template-docs]: https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html
-
-## 🚴 Usage
-
-### 🐑 Use `cargo generate` to Clone this Template
-
-[Learn more about `cargo generate` here.](https://github.com/ashleygwilliams/cargo-generate)
+#### wasm build
 
 ```
-cargo generate --git https://github.com/rustwasm/wasm-pack-template.git --name my-project
-cd my-project
+wasm-pack build --target web
 ```
 
-### 🛠️ Build with `wasm-pack build`
+`target` オプションは `web` を指定する。  
+オプションなしでは `bundler` となるが、これは webpack の設定を行える場合に使用する。
+しかし、このアプリでは React のアプリケーションを `create-react-app` で作成し、webpack の設定を手動で行わないため、target を web とする。
 
+https://rustwasm.github.io/docs/wasm-bindgen/reference/deployment.html#deploying-rust-and-webassembly
+
+wasm-pack でのビルドは `react-wasm/` で `npm run build:wasm` でもできるようにしている。
+
+### react から wasm function の呼び出し
+
+```js
+import init, {greet} from "rust-tsumekomi";
+
+// init が完了後に 目当ての関数をコールする
+init().then(()=>{
+    greet();
+})
 ```
-wasm-pack build
-```
-
-### 🔬 Test in Headless Browsers with `wasm-pack test`
-
-```
-wasm-pack test --headless --firefox
-```
-
-### 🎁 Publish to NPM with `wasm-pack publish`
-
-```
-wasm-pack publish
-```
-
-## 🔋 Batteries Included
-
-* [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindgen) for communicating
-  between WebAssembly and JavaScript.
-* [`console_error_panic_hook`](https://github.com/rustwasm/console_error_panic_hook)
-  for logging panic messages to the developer console.
-* [`wee_alloc`](https://github.com/rustwasm/wee_alloc), an allocator optimized
-  for small code size.

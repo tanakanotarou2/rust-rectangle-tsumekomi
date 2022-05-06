@@ -1,54 +1,20 @@
-use std::time::Instant;
 use std::ops::{Index, IndexMut};
 use itertools::{concat, Itertools};
 // use rand_pcg::Mcg128Xsl64;
 
-use proconio::{*, marker::*};
+use proconio::{*};
+use crate::mat;
 use crate::procon_utils::SetMinMax;
-/* timer
------------------------- */
-struct Timer {
-    since: Instant,
-    duration: f64,
-}
+use crate::procon_utils::Timer;
 
-impl Timer {
-    fn new(duration: f64) -> Timer {
-        Timer {
-            since: Instant::now(),
-            duration,
-        }
-    }
-    fn t(&self) -> f64 {
-        (Instant::now() - self.since).as_secs_f64() * (1.0 / self.duration)
-    }
-
-    /*
-     * 経過時間取得(sec)
-     * 実行経過時間測定用
-     * 実行直後に1度コールする。2回目以降は1度目のコールからの経過時間を返す
-     *
-     */
-    fn get_time() -> f64 {
-        static mut STIME: f64 = -1.0;
-        let t = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap();
-        let ms = t.as_secs() as f64 + t.subsec_nanos() as f64 * 1e-9;
-        unsafe {
-            if STIME < 0.0 {
-                STIME = ms;
-            }
-            ms - STIME
-        }
-    }
-}
 
 #[derive(Clone, Debug)]
-struct Input {
-    n: usize,
+pub struct Input {
+    pub n: usize,
     // item count
-    w: usize,
+    pub w: usize,
     // width
-    a: Vec<(usize, usize)>,
+    pub a: Vec<(usize, usize)>,
 }
 
 fn parse_input() -> Input {
@@ -60,14 +26,23 @@ fn parse_input() -> Input {
     Input { n, w, a }
 }
 
+pub fn solve(input: &Input) -> Vec<i32> {
+    Timer::get_time();
+    while Timer::get_time() < 1.0 {
+        // wait
+    }
+    return mat![0i32;3];
+}
+
+
 pub fn main() {
     // Logger::init();
-    // Timer::get_time();
+    Timer::get_time();
     // let input=parse_input();
     // println!("{:?}",input);
     // let input = parse_input();
     // println!("{}", out.iter().join(""));
-    let mut x:i32=50;
+    let mut x: i32 = 50;
     x.chmax(100);
     println!("{}", x);
 }

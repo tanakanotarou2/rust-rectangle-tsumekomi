@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
-import init, {greet} from "rust-tsumekomi";
+import init, { solve} from "rust-tsumekomi";
 
 function App() {
     useEffect(() => {
         init().then(()=>{
-            greet();
+            let res=solve();
+            console.log(res);
         })
     }, [])
 

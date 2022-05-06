@@ -17,8 +17,10 @@ default = ["console_error_panic_hook"]
 local = []
 
 [dependencies]
-wasm-bindgen = "0.2.63"
-
+serde = { version = "1.0", features = ["derive"] }
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+#wasm-bindgen = "0.2.63"
+#serde = { version = "1.0", features = ["derive"] }
 # 乱数
 rand = { version = "=0.7.3", features = ["small_rng"] }
 #getrandom = "=0.1.14"
@@ -49,6 +51,15 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 #
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 wee_alloc = { version = "0.4.5", optional = true }
+
+# std::time の代わり
+# https://github.com/sebcrozet/instant
+instant = { version = "0.1", features = ["wasm-bindgen", "inaccurate"] }
+
+[dependencies.web-sys]
+version = "0.3.57"
+features = [
+    'Performance', ]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"

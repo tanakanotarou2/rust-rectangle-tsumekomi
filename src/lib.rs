@@ -43,18 +43,37 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct SolverRes {
-    pub pos_list: Vec<(usize, usize)>,
+    pub pos_list: Vec<(usize, usize, usize, usize, usize)>, // no, x,y,width,height
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SolverInp {
+    pub width: usize,
+    pub squares: Vec<(usize, usize, usize)>, // no, width,height
 }
 
 #[wasm_bindgen]
-pub fn solve() -> JsValue {
+pub fn solve(jsVal: &JsValue) -> JsValue {
     console_error_panic_hook::set_once(); // エラーがあった場合にログ出力
-
-    let mut input = Input { n: 3, w: 10, a: vec![(1, 10), (5, 10), (100, 10)] };
-    let res = bl_solve::solve(&input);
-    let res = SolverRes {
-        pos_list: res
+    let inp: SolverInp = jsVal.into_serde().unwrap();
+    let mut input = Input {
+        n: inp.squares.len(),
+        w: inp.width,
+        a: inp.squares.clone(),
     };
 
+    let pos = bl_solve::solve(&input);
+    let mut res = SolverRes {
+        pos_list: vec![(0, 0, 0, 0, 0); input.n]
+    };
+    for a in input.a.into_iter() {
+        res.pos_list[a.0].0 = a.0;
+        res.pos_list[a.0].3 = a.1;
+        res.pos_list[a.0].4 = a.2;
+    }
+    for p in pos {
+        res.pos_list[p.0].1 = p.1;
+        res.pos_list[p.0].2 = p.2;
+    }
     JsValue::from_serde(&res).unwrap()
 }

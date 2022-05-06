@@ -1,4 +1,5 @@
 extern crate console_error_panic_hook;
+
 mod utils;
 mod procon_utils;
 pub mod bl_solve;
@@ -39,20 +40,21 @@ pub fn greet() {
 
 
 use serde::{Serialize, Deserialize};
+
 #[derive(Serialize, Deserialize)]
 pub struct SolverRes {
-    pub field: Vec<(i32, i32)>,
+    pub pos_list: Vec<(usize, usize)>,
 }
 
 #[wasm_bindgen]
 pub fn solve() -> JsValue {
-    console_error_panic_hook::set_once();
-    let mut input = Input { n: 3, w: 3, a: vec![(1, 2)] };
+    console_error_panic_hook::set_once(); // エラーがあった場合にログ出力
+
+    let mut input = Input { n: 3, w: 10, a: vec![(1, 10), (5, 10), (100, 10)] };
     let res = bl_solve::solve(&input);
-    let res=SolverRes {
-        field: vec![(1, 2), (3, 4)]
+    let res = SolverRes {
+        pos_list: res
     };
 
     JsValue::from_serde(&res).unwrap()
-
 }

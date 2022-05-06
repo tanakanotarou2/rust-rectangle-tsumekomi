@@ -13,8 +13,7 @@ pub struct Input {
     pub n: usize,
     // item count
     pub w: usize,
-    // width
-    pub a: Vec<(usize, usize)>,
+    pub a: Vec<(usize, usize)>, // item width, height
 }
 
 fn parse_input() -> Input {
@@ -26,24 +25,39 @@ fn parse_input() -> Input {
     Input { n, w, a }
 }
 
-pub fn solve(input: &Input) -> Vec<i32> {
-    Timer::get_time();
-    while Timer::get_time() < 1.0 {
-        // wait
+fn NF_solve(input: &Input) -> Vec<(usize, usize)> {
+    let N: usize = input.n;
+    let W: usize = input.w;
+    let mut level_y = (0, 0);
+    let mut last_x = 0usize;
+    let mut res = vec![];
+
+    for &(w, h) in input.a.iter() {
+        if w > W {
+            res.push((!0, !0));
+            continue;
+        }
+        if level_y.1 - level_y.0 < h || last_x + w > W {
+            level_y = (level_y.1, level_y.1 + h);
+            last_x = 0;
+        }
+        res.push((last_x, level_y.0));
+        last_x += w;
     }
-    return mat![0i32;3];
+    res
+}
+
+
+pub fn solve(input: &Input) -> Vec<(usize, usize)> {
+    return NF_solve(&input);
 }
 
 
 pub fn main() {
     // Logger::init();
     Timer::get_time();
-    // let input=parse_input();
-    // println!("{:?}",input);
-    // let input = parse_input();
-    // println!("{}", out.iter().join(""));
-    let mut x: i32 = 50;
-    x.chmax(100);
-    println!("{}", x);
+    let input = parse_input();
+    let res = solve(&input);
+    println!("{:?}", res);
 }
 

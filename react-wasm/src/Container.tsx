@@ -3,10 +3,23 @@ import Canvas from "./Canvas";
 
 import init, {solve} from "rust-tsumekomi";
 
+type CanvasState = {
+    squares: Array<Array<number>> | null
+    width: number
+}
+
+/**
+ * 全体的な管理を行う
+ *
+ * このコンポーネントで扱う情報
+ * - 現在の表示する盤面の状態
+ * - 使用するテストデータなど
+ * などなど
+ */
 const Container = () => {
-    const [squares, setSquares] = useState<Array<Array<number>>>([])
-    const [initialized, setInitialized] = useState<boolean>(false)
-    let width=400;
+    const [canvasState, setCanvasState] = useState<CanvasState>({squares: null, width: 200})
+    // const [squares, setSquares] = useState<Array<Array<number>>>([])
+    // const [initialized, setInitialized] = useState<boolean>(false)
 
     let solve_random = () => {
         let sq = [];
@@ -20,27 +33,18 @@ const Container = () => {
         }
         const params = {
             squares: sq,
-            width: width
+            width: canvasState.width
         }
         init().then(() => {
             const res = solve(params);
-            console.log(res.pos_list)
-            setSquares(res.pos_list)
+            setCanvasState({squares:res.pos_list,width:canvasState.width})
         })
     }
 
-    useEffect(() => {
-
-        if (!initialized) {
-            solve_random()
-            setInitialized(true)
-        }
-    })
-
     return (
         <>
-
-            <Canvas width={width} squares={squares}/>
+            <button onClick={solve_random}>random</button>
+            <Canvas {...canvasState}/>
         </>
     )
 }

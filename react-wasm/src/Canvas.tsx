@@ -1,4 +1,5 @@
 import {useContext, useEffect, useRef, useState} from "react";
+import {useMountEffect} from "./utils";
 
 type Props = {
     squares: Array<Array<number>> | null
@@ -30,7 +31,7 @@ const Canvas = (props: Props) => {
         ctx.fillText(no + "", x0, canvasHeight - y0 - height + 10)
     }
     const drawSquares = () => {
-        if(!canvasRef.current)return;
+        if (!canvasRef.current) return;
         const canvas: any = canvasRef.current;
         const ctx = canvas.getContext('2d');
         clearCanvas(ctx, canvas.width, canvas.height)
@@ -42,16 +43,16 @@ const Canvas = (props: Props) => {
             props.squares.forEach(v => drawRect(ctx, v))
         }
     }
-
-    useEffect(() => {
+    useMountEffect(() => {
+        drawSquares()
     })
-    //
-    console.log(props.squares)
+
+
     drawSquares()
 
     return (
         <>
-            <canvas ref={canvasRef} width={props.width || 400} height={400}></canvas>
+            <canvas ref={canvasRef} width={props.width || 400} height={500}></canvas>
         </>
     )
 }

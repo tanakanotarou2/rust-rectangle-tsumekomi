@@ -43,6 +43,7 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct SolverRes {
+    pub height: usize,
     pub pos_list: Vec<(usize, usize, usize, usize, usize)>, // no, x,y,width,height
 }
 
@@ -52,8 +53,7 @@ pub struct SolverInp {
     pub squares: Vec<(usize, usize, usize)>, // no, width,height
 }
 
-#[wasm_bindgen]
-pub fn solve(jsVal: &JsValue) -> JsValue {
+pub fn solve<F: Fn(&Input) -> (usize, Vec<(usize, usize, usize)>)>(jsVal: &JsValue, solver: F) -> JsValue {
     console_error_panic_hook::set_once(); // エラーがあった場合にログ出力
     let inp: SolverInp = jsVal.into_serde().unwrap();
     let mut input = Input {
@@ -62,9 +62,10 @@ pub fn solve(jsVal: &JsValue) -> JsValue {
         a: inp.squares.clone(),
     };
 
-    let pos = bl_solve::solve(&input);
+    let (max_height,pos) = solver(&input);
     let mut res = SolverRes {
-        pos_list: vec![(0, 0, 0, 0, 0); input.n]
+        height: max_height,
+        pos_list: vec![(0, 0, 0, 0, 0); input.n],
     };
     for a in input.a.into_iter() {
         res.pos_list[a.0].0 = a.0;
@@ -76,4 +77,16 @@ pub fn solve(jsVal: &JsValue) -> JsValue {
         res.pos_list[p.0].2 = p.2;
     }
     JsValue::from_serde(&res).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn NF_solve(jsVal: &JsValue) -> JsValue {
+    console_error_panic_hook::set_once(); // エラーがあった場合にログ出力
+    return solve(jsVal, bl_solve::NF_solve);
+}
+
+#[wasm_bindgen]
+pub fn NFDH_solve(jsVal: &JsValue) -> JsValue {
+    console_error_panic_hook::set_once(); // エラーがあった場合にログ出力
+    return solve(jsVal, bl_solve::NFDH_solve);
 }

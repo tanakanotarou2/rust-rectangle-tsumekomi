@@ -1,11 +1,12 @@
 import {useContext, useEffect, useRef, useState} from "react";
 import Canvas from "./Canvas";
 
-import init, {solve} from "rust-tsumekomi";
+import init, {NF_solve, NFDH_solve} from "rust-tsumekomi";
+import {useMountEffect} from "./utils";
 
-type CanvasState = {
+type problemResult = {
     squares: Array<Array<number>> | null
-    width: number
+    height: number
 }
 
 type DataSet = {
@@ -39,25 +40,80 @@ const generate_random_dataset = (num: number, width: number) => {
  * などなど
  */
 const Container = () => {
-    const [canvasState, setCanvasState] = useState<CanvasState>({squares: null, width: 200})
-    const [dataset, setDataSet] = useState<DataSet>({squares: [], width: 200})
+    const [problemResult, setProblemResult] = useState<problemResult>({squares: null, height: 0})
+    const [dataset, setDataSet] = useState<DataSet>(generate_random_dataset(100, 400))
+
+    const [selAlgo, setSelAlgo] = useState<string>("NF");
     // const [squares, setSquares] = useState<Array<Array<number>>>([])
     // const [initialized, setInitialized] = useState<boolean>(false)
 
-    let update_random_dataset = () => {
-        const dataset = generate_random_dataset(20, 200)
-        setDataSet(dataset)
-
+    const reSolve = (algo: string, dataset: DataSet) => {
+        let fnc;
+        if (algo === "NFDH") {
+            fnc = NFDH_solve
+        } else {
+            fnc = NF_solve
+        }
         init().then(() => {
-            const res = solve(dataset);
-            setCanvasState({squares: res.pos_list, width: canvasState.width})
+            const res = fnc(dataset);
+            setProblemResult({
+                squares: res.pos_list,
+                height: res.height
+            })
         })
     }
 
+    const changeAlgo = (name: string) => {
+        setSelAlgo((v) => name)
+        reSolve(name, dataset);
+    }
+
+    let changeRandomDataset = () => {
+        const dataset = generate_random_dataset(100, 400)
+        setDataSet(() => dataset)
+        reSolve(selAlgo, dataset);
+    }
+    useMountEffect(() => {
+        reSolve(selAlgo, dataset)
+    })
+
+    const _label_style={
+        margin:"5px auto",
+        backgroundColor: "white",
+        color: "black",
+        width: ((dataset.width <400)?400:dataset.width)+"px",
+    }
     return (
         <>
-            <button onClick={update_random_dataset}>random</button>
-            <Canvas {...canvasState}/>
+            <div>
+                <label>
+                    <input
+                        name="algo"
+                        type="radio"
+                        onChange={() => changeAlgo("NF")}
+                        value="NF"
+                        checked={selAlgo === "NF"}
+                    />
+                    NF法
+                </label>
+                <label>
+                    <input
+                        name="algo"
+                        type="radio"
+                        value="NFDH"
+                        checked={selAlgo === "NFDH"}
+                        onChange={() => changeAlgo("NFDH")}
+                    />
+                    NFDH法
+                </label>
+                <button onClick={changeRandomDataset}>ランダムデータ更新</button>
+            </div>
+
+            <div>
+                <div style={_label_style}>height: {problemResult.height}</div>
+
+                <Canvas width={dataset.width} {...problemResult}/>
+            </div>
         </>
     )
 }

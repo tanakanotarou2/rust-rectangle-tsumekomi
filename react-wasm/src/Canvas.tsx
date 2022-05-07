@@ -4,6 +4,7 @@ import {useMountEffect} from "./utils";
 type Props = {
     squares: Array<Array<number>> | null
     width: number
+    height: number
 }
 
 let clearCanvas = (context, width, height) => {
@@ -23,8 +24,6 @@ const Canvas = (props: Props) => {
         const [no, x0, y0, width, height] = attr;
 
         ctx.strokeStyle = 'rgb( 0, 0, 0)';
-        console.log(x0, y0, width, height);
-        console.log(x0, canvasHeight - y0 - height, width, canvasHeight - y0);
         ctx.strokeRect(x0, canvasHeight - y0 - height, width, height)
 
         ctx.fillStyle = 'rgb( 255, 0, 0)'
@@ -43,16 +42,17 @@ const Canvas = (props: Props) => {
             props.squares.forEach(v => drawRect(ctx, v))
         }
     }
-    useMountEffect(() => {
+    useEffect(()=>{
+        // TODO: (確認)キャンバスはロード完了してから描画するもよう。
         drawSquares()
     })
 
 
-    drawSquares()
+    // drawSquares()
 
     return (
         <>
-            <canvas ref={canvasRef} width={props.width || 400} height={800}></canvas>
+            <canvas ref={canvasRef} width={props.width || 400} height={(props.height||400)+10}></canvas>
         </>
     )
 }

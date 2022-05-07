@@ -26,7 +26,8 @@ fn parse_input() -> Input {
     Input { n, w, a }
 }
 
-fn NF_solve(input: &Input) -> Vec<(usize, usize, usize)> {
+/* NF法 */
+pub fn NF_solve(input: &Input) -> (usize, Vec<(usize, usize, usize)>) {
     let N: usize = input.n;
     let W: usize = input.w;
     let mut level_y = (0, 0);
@@ -45,12 +46,17 @@ fn NF_solve(input: &Input) -> Vec<(usize, usize, usize)> {
         res.push((no, last_x, level_y.0));
         last_x += w;
     }
-    res
+    (level_y.1, res)
 }
-
-
-pub fn solve(input: &Input) -> Vec<(usize, usize, usize)> {
-    return NF_solve(&input);
+/* NFDH 法 */
+pub fn NFDH_solve(input: &Input) -> (usize, Vec<(usize, usize, usize)>) {
+    let mut a = input.a.clone();
+    a.sort_by_key(|&v| -(v.2 as i32));
+    return NF_solve(&Input {
+        n: input.n,
+        w: input.w,
+        a,
+    });
 }
 
 
@@ -59,7 +65,7 @@ pub fn main() {
     Timer::get_time();
     let input = parse_input();
     // println!("{:?}",input);
-    let res = solve(&input);
+    let res = NF_solve(&input);
     println!("{:?}", res);
 }
 

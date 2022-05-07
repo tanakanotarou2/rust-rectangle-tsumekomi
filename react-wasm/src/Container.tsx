@@ -8,6 +8,28 @@ type CanvasState = {
     width: number
 }
 
+type DataSet = {
+    squares: Array<Array<number>> | null
+    width: number
+}
+
+const generate_random_dataset = (num: number, width: number) => {
+    let sq = [];
+
+    for (let i = 0; i < num; i++) {
+        sq.push([
+            i,
+            Math.floor(Math.random() * 100) + 1,
+            Math.floor(Math.random() * 80) + 1,
+        ])
+    }
+    return {
+        squares: sq,
+        width: width
+    }
+
+}
+
 /**
  * 全体的な管理を行う
  *
@@ -18,32 +40,23 @@ type CanvasState = {
  */
 const Container = () => {
     const [canvasState, setCanvasState] = useState<CanvasState>({squares: null, width: 200})
+    const [dataset, setDataSet] = useState<DataSet>({squares: [], width: 200})
     // const [squares, setSquares] = useState<Array<Array<number>>>([])
     // const [initialized, setInitialized] = useState<boolean>(false)
 
-    let solve_random = () => {
-        let sq = [];
+    let update_random_dataset = () => {
+        const dataset = generate_random_dataset(20, 200)
+        setDataSet(dataset)
 
-        for (let i = 0; i < 20; i++) {
-            sq.push([
-                i,
-                Math.floor(Math.random() * 100) + 1,
-                Math.floor(Math.random() * 80) + 1,
-            ])
-        }
-        const params = {
-            squares: sq,
-            width: canvasState.width
-        }
         init().then(() => {
-            const res = solve(params);
-            setCanvasState({squares:res.pos_list,width:canvasState.width})
+            const res = solve(dataset);
+            setCanvasState({squares: res.pos_list, width: canvasState.width})
         })
     }
 
     return (
         <>
-            <button onClick={solve_random}>random</button>
+            <button onClick={update_random_dataset}>random</button>
             <Canvas {...canvasState}/>
         </>
     )

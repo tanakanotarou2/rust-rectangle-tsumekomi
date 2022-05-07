@@ -52,7 +52,7 @@ const Canvas = (props: Props) => {
 
     return (
         <>
-            <canvas ref={canvasRef} width={props.width || 400} height={500}></canvas>
+            <canvas ref={canvasRef} width={props.width || 400} height={800}></canvas>
         </>
     )
 }

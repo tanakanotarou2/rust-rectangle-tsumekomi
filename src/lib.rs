@@ -90,3 +90,8 @@ pub fn NFDH_solve(jsVal: &JsValue) -> JsValue {
     console_error_panic_hook::set_once(); // エラーがあった場合にログ出力
     return solve(jsVal, bl_solve::NFDH_solve);
 }
+#[wasm_bindgen]
+pub fn BLF_solve(jsVal: &JsValue) -> JsValue {
+    console_error_panic_hook::set_once(); // エラーがあった場合にログ出力
+    return solve(jsVal, bl_solve::BLF_solve);
+}

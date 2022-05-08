@@ -1,7 +1,7 @@
 import {useContext, useEffect, useRef, useState} from "react";
 import Canvas from "./Canvas";
 
-import init, {NF_solve, NFDH_solve} from "rust-tsumekomi";
+import init, {NF_solve, NFDH_solve, BLF_solve} from "rust-tsumekomi";
 import {useMountEffect} from "./utils";
 
 type problemResult = {
@@ -49,7 +49,10 @@ const Container = () => {
 
     const reSolve = (algo: string, dataset: DataSet) => {
         let fnc;
-        if (algo === "NFDH") {
+        if(algo==="BLF"){
+            fnc = BLF_solve
+        }
+        else if (algo === "NFDH") {
             fnc = NFDH_solve
         } else {
             fnc = NF_solve
@@ -105,6 +108,16 @@ const Container = () => {
                         onChange={() => changeAlgo("NFDH")}
                     />
                     NFDH法
+                </label>
+                <label>
+                    <input
+                        name="algo"
+                        type="radio"
+                        value="BLF"
+                        checked={selAlgo === "BLF"}
+                        onChange={() => changeAlgo("BLF")}
+                    />
+                    BLF法
                 </label>
                 <button onClick={changeRandomDataset}>ランダムデータ更新</button>
             </div>

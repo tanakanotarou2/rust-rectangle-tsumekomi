@@ -48,14 +48,14 @@ pub struct SolverRes {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct SolverInp {
+pub struct SolverInput {
     pub width: usize,
     pub squares: Vec<(usize, usize, usize)>, // no, width,height
 }
 
 pub fn solve<F: Fn(&Input) -> (usize, Vec<(usize, usize, usize)>)>(jsVal: &JsValue, solver: F) -> JsValue {
     console_error_panic_hook::set_once(); // エラーがあった場合にログ出力
-    let inp: SolverInp = jsVal.into_serde().unwrap();
+    let inp: SolverInput = jsVal.into_serde().unwrap();
     let mut input = Input {
         n: inp.squares.len(),
         w: inp.width,

@@ -60,6 +60,32 @@ pub fn NFDH_solve(input: &Input) -> (usize, Vec<(usize, usize, usize)>) {
     });
 }
 
+#[derive(Clone, Debug)]
+pub struct Rect {
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+    right: usize,
+    top: usize,
+}
+
+impl Rect {
+    pub fn new(x: usize, y: usize, w: usize, h: usize) -> Rect {
+        Self {
+            x,
+            y,
+            w,
+            h,
+            right: x + w,
+            top: y + h,
+        }
+    }
+    pub fn area(&mut self) -> usize {
+        self.h * self.w
+    }
+}
+
 
 pub fn BLF_solve(input: &Input) -> (usize, Vec<(usize, usize, usize)>) {
     let W: usize = input.w;
@@ -69,9 +95,8 @@ pub fn BLF_solve(input: &Input) -> (usize, Vec<(usize, usize, usize)>) {
 
     let mut bl_lst = vec![(0usize, 0usize)]; // BL安定点の候補のリスト
 
-    //TODO: わかりにくいので長方形の構造体作るほうがよいかもしれません。
     // 配置済の長方形(k)
-    let mut k_lst: Vec<(usize, usize, usize, usize)> = vec![]; // x, y, x+w, y+h;
+    let mut k_lst: Vec<Rect> = vec![]; // x, y, x+w, y+h;
 
 
     for ii in 0..input.n {
@@ -88,10 +113,11 @@ pub fn BLF_solve(input: &Input) -> (usize, Vec<(usize, usize, usize)>) {
             let i_t = bp.1 + h;
             if i_r > W { continue; }
 
-            if k_lst.iter().all(|&k| {
+            // O(N)
+            if k_lst.iter().all(|k| {
                 // 区間重複
-                let x = bp.0 < k.2 && k.0 < i_r;
-                let y = bp.1 < k.3 && k.1 < i_t;
+                let x = bp.0 < k.right && k.x < i_r;
+                let y = bp.1 < k.top && k.y < i_t;
                 // x、y座標いずれか満たさなければOK
                 return !x || !y;
             }) {
@@ -102,37 +128,40 @@ pub fn BLF_solve(input: &Input) -> (usize, Vec<(usize, usize, usize)>) {
             }
         }
         assert_ne!(pos.0, !0, "{} {}", ii, bl_lst.len());
-        // 配置するBL安定点の確定
-        let mut pos = (pos.0, pos.1, pos.0 + w, pos.1 + h);
-        println!("selected pos:{:?}", pos);
+        // 配置する区画
+        let mut place = Rect::new(pos.0, pos.1, w, h);
+        println!("selected place:{:?}", place);
+        let pos = 0;
 
-        // 新しいBL安定点を追加 O(N)
+        // 新しいBL安定点候補を追加 O(N)
         //母材と長方形iのBL安定点
-        bl_lst.push((pos.2, 0));
-        bl_lst.push((0, pos.3));
+        bl_lst.push((place.right, 0));
+        bl_lst.push((0, place.top));
 
-        for &k in k_lst.iter() {
+        for k in k_lst.iter() {
             // k.y + k.h (=k.3) の左方向へのBL安定点
             // 長方形 i が 長方形 k より上、左側にある場合、BL安定点を追加
-            if pos.2 < k.2 && pos.3 > k.3 {
-                bl_lst.push((pos.2, k.3))
+            if place.right < k.right && place.top > k.top {
+                bl_lst.push((place.right, k.top))
             }
 
             // k.x + k.w (=k.2) の下方向へのBL安定点
             // 長方形 i が 長方形 k より下、右側にある場合、BL安定点を追加
-            if pos.3 < k.3 && pos.2 > k.2 {
-                bl_lst.push((k.2, pos.3))
+            if place.top < k.top && place.right > k.right {
+                bl_lst.push((k.right, place.top))
             }
         }
-        k_lst.push((pos.0, pos.1, pos.2, pos.3));
+        // TODO:追加した四角形と重なるBL安定点の候補は削除
+
+        k_lst.push(place);
     }
 
     let mut max_height = 0;
     let mut res = vec![];
     for i in 0..input.n {
         let no = ids[i];
-        res.push((no as usize, k_lst[i].0, k_lst[i].1));
-        max_height.chmax(k_lst[i].3);
+        res.push((no as usize, k_lst[i].x, k_lst[i].y));
+        max_height.chmax(k_lst[i].top);
     }
     (max_height, res)
 }

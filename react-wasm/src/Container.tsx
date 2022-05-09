@@ -162,7 +162,7 @@ const Container = () => {
                                       onChange={handleChangeInput}
                             ></textarea>
                         </div>
-                        <button onClick={changeRandomDataset}>ランダムデータ作成</button>
+                        <button onClick={changeRandomDataset}>ランダム入力データ作成</button>
                     </div>
                     <div className="output">
                         <label htmlFor="output">出力</label>

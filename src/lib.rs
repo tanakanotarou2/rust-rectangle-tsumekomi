@@ -43,39 +43,31 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct SolverRes {
-    pub height: usize,
-    pub pos_list: Vec<(usize, usize, usize, usize, usize)>, // no, x,y,width,height
+    pub pos_list: Vec<(usize, usize)>, // x,y
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct SolverInput {
+    pub n: usize,
     pub width: usize,
-    pub squares: Vec<(usize, usize, usize)>, // no, width,height
+    pub squares: Vec<(usize, usize)>, // width,height
 }
 
-pub fn solve<F: Fn(&Input) -> (usize, Vec<(usize, usize, usize)>)>(jsVal: &JsValue, solver: F) -> JsValue {
+pub fn solve<F: Fn(&Input) -> Vec<(usize, usize)>>(jsVal: &JsValue, solver: F) -> JsValue {
     console_error_panic_hook::set_once(); // エラーがあった場合にログ出力
     let inp: SolverInput = jsVal.into_serde().unwrap();
     let mut input = Input {
-        n: inp.squares.len(),
+        n: inp.n,
         w: inp.width,
         a: inp.squares.clone(),
     };
 
-    let (max_height,pos) = solver(&input);
+    let pos = solver(&input);
+
     let mut res = SolverRes {
-        height: max_height,
-        pos_list: vec![(0, 0, 0, 0, 0); input.n],
+        pos_list: pos.clone()
     };
-    for a in input.a.into_iter() {
-        res.pos_list[a.0].0 = a.0;
-        res.pos_list[a.0].3 = a.1;
-        res.pos_list[a.0].4 = a.2;
-    }
-    for p in pos {
-        res.pos_list[p.0].1 = p.1;
-        res.pos_list[p.0].2 = p.2;
-    }
+
     JsValue::from_serde(&res).unwrap()
 }
 
@@ -90,6 +82,7 @@ pub fn NFDH_solve(jsVal: &JsValue) -> JsValue {
     console_error_panic_hook::set_once(); // エラーがあった場合にログ出力
     return solve(jsVal, bl_solve::NFDH_solve);
 }
+
 #[wasm_bindgen]
 pub fn BLF_solve(jsVal: &JsValue) -> JsValue {
     console_error_panic_hook::set_once(); // エラーがあった場合にログ出力

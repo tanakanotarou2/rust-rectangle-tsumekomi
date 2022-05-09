@@ -1,5 +1,4 @@
 import {useContext, useEffect, useRef, useState} from "react";
-import {useMountEffect} from "./utils";
 
 type Props = {
     squares: Array<Array<number>> | null
@@ -7,21 +6,24 @@ type Props = {
     height: number
 }
 
-let clearCanvas = (context, width, height) => {
-    // fill background
-    context.beginPath();
-    context.fillStyle = 'rgb( 255, 255, 255)';
-    context.fillRect(0, 0, width, height);
-    context.save();
-}
-
 
 const Canvas = (props: Props) => {
     const canvasRef = useRef(null);
     let canvasHeight, canvasWidth;
 
-    let drawRect = (ctx, attr) => {
-        const [no, x0, y0, width, height] = attr;
+    let clearCanvas = (context, width, height) => {
+        // fill background
+        context.beginPath();
+        context.fillStyle = 'rgb( 255, 255, 255)';
+        context.fillRect(0, 0, width, height);
+
+        context.fillStyle = 'rgb( 50, 50, 50)';
+        context.fillRect(props.width, 0, width, height);
+        context.save();
+    }
+
+    let drawRect = (ctx, no, attr) => {
+        const [x0, y0, width, height] = attr;
 
         ctx.strokeStyle = 'rgb( 0, 0, 0)';
         ctx.strokeRect(x0, canvasHeight - y0 - height, width, height)
@@ -36,23 +38,20 @@ const Canvas = (props: Props) => {
         clearCanvas(ctx, canvas.width, canvas.height)
         canvasWidth = canvas.width;
         canvasHeight = canvas.height;
+        console.log("pr", props)
 
         if (!!props.squares && props.squares.length > 0) {
             ctx.font = "12px serif";
-            props.squares.forEach(v => drawRect(ctx, v))
+            props.squares.forEach((v, i) => drawRect(ctx, i, v))
         }
     }
-    useEffect(()=>{
+    useEffect(() => {
         // TODO: (確認)キャンバスはロード完了してから描画するもよう。
         drawSquares()
     })
-
-
-    // drawSquares()
-
     return (
         <>
-            <canvas ref={canvasRef} width={props.width || 400} height={(props.height||400)+10}></canvas>
+            <canvas ref={canvasRef} width={props.width || 400} height={(props.height || 400) + 10}></canvas>
         </>
     )
 }

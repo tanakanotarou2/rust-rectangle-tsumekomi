@@ -154,7 +154,10 @@ const Container = () => {
                 <div>
                     <div className="input">
                         <div>
+                            <div>
                             <label htmlFor="inp">入力データ</label>
+                            (<a href={"https://github.com/tanakanotarou2/rust-rectangle-tsumekomi/blob/main/docs/mondai.md#%E5%85%A5%E5%87%BA%E5%8A%9B"} >入出力説明</a>)
+                            </div>
                             <textarea id="inp"
                                       name="inp"
                                       placeholder={input_placeholder}

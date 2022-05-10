@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "./static/css/main.9d169770.css",
+    "main.js": "./static/js/main.f4fbd797.js",
+    "static/js/787.3fa25858.chunk.js": "./static/js/787.3fa25858.chunk.js",
+    "static/media/rust_tsumekomi_bg.wasm": "./static/media/rust_tsumekomi_bg.124e0da32843bc1cbd6e.wasm",
+    "index.html": "./index.html",
+    "main.9d169770.css.map": "./static/css/main.9d169770.css.map",
+    "main.f4fbd797.js.map": "./static/js/main.f4fbd797.js.map",
+    "787.3fa25858.chunk.js.map": "./static/js/787.3fa25858.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9d169770.css",
+    "static/js/main.f4fbd797.js"
+  ]
+}

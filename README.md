@@ -1,7 +1,9 @@
 ## これはなに
 Rust、 React の練習アプリケーション。
 
-長方形詰め込み問題を Rust で解き react で描画する。
+長方形詰め込み問題を Rust で解き React で描画する。
+
+https://tanakanotarou2.github.io/rust-rectangle-tsumekomi/
 
 ## 開発メモ
 
@@ -25,7 +27,7 @@ https://rustwasm.github.io/docs/wasm-bindgen/reference/deployment.html#deploying
 
 wasm-pack でのビルドは `react-wasm/` で `npm run build:wasm` でもできるようにしている。
 
-### react から wasm function の呼び出し
+### React から wasm function の呼び出し
 
 ```js
 import init, {greet} from "rust-tsumekomi";
@@ -35,3 +37,11 @@ init().then(()=>{
     greet();
 })
 ```
+
+## デプロイ
+
+`gh-pages` を使ってデプロイします。
+
+前もって、`npm run build:wasm`, `npm run build` を行います。  
+ビルドされたモジュールを `npm run deploy` を実行し、github へアップロードします。
+しばらくするとデプロイされてページが更新されます。

@@ -121,7 +121,6 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
         let mut pos: (usize, usize) = (!0, !0);
 
         // すでに配置済の長方形:k と重ならず, 長方形を配置できるBL安定点
-        // println!("i:{} {:?}", i, bl_lst);
         bl_lst.sort_by_key(|(x, y)| (*y, *x));
         for &bp in bl_lst.iter() { // O(bl_pos)
             let i_r = bp.0 + w;
@@ -146,14 +145,12 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
         assert_ne!(pos.0, !0, "{} {}", i, bl_lst.len());
         // 配置する区画
         let mut place = Rect::new(pos.0, pos.1, w, h);
-        // println!("selected place:{:?}", place);
-
 
         // 横line
         {
-            // line の縮小
+            // // line の縮小
             for v in h_lines.iter_mut().filter(|line| {
-                place.y <= line.0 && line.0 <= place.top &&
+                place.y < line.0 && line.0 <= place.top &&
                     place.x < line.2 && line.1 < place.right // x座標の端点は重なるものは残して良い
             }) {
                 let (y, l, r) = *v;
@@ -181,7 +178,7 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
                 for k in k_lst.iter() {
                     let (y, mut l, r) = line;
                     if k.y <= y && y <= k.top {
-                        if k.x <= r {
+                        if k.x < r {
                             l.chmax(k.right);
                         }
                     }
@@ -208,7 +205,7 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
         {
             // line の縮小
             for v in v_lines.iter_mut().filter(|line| {
-                place.x <= line.0 && line.0 <= place.right &&
+                place.x < line.0 && line.0 <= place.right &&
                     place.y < line.2 && line.1 < place.top // y軸の端点は重なるものは残して良い
             }) {
                 let (x, l, r) = *v;
@@ -234,7 +231,7 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
                 for k in k_lst.iter() {
                     let (x, mut b, t) = line;
                     if k.x <= x && x <= k.right {
-                        if k.y <= t {
+                        if k.y < t {
                             b.chmax(k.top);
                         }
                     }
@@ -277,7 +274,6 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
         }
 
     }
-    // println!("bl list:{}", bl_lst.len());
     k_lst
 }
 
@@ -289,7 +285,7 @@ pub fn BLF_solve(input: &Input) -> Vec<(usize, usize)> {
     a.sort_by_key(|&v| -(v.1 as i32));
     let mut k_lst = BLF_pack(input.w, &a);
     let score = calc_score(&k_lst);
-    println!("socre: {}", score);
+    eprintln!("socre: {}", score);
     k_lst.into_iter().enumerate().sorted_by_key(|(i, _)| ids[*i]).map(|(_, v)| {
         (v.x, v.y)
     }).collect_vec()
@@ -312,7 +308,7 @@ pub fn BLF_solve2(input: &Input) -> Vec<(usize, usize)> {
     let mut best_res = vec![];
     let mut iter = 0;
     while Timer::get_time() < LIM {
-        if iter>1{break;}
+        // if iter>1{break;}
         iter += 1;
         let mut k_lst = BLF_pack(input.w, &a);
         let score = calc_score(&k_lst);
@@ -320,8 +316,7 @@ pub fn BLF_solve2(input: &Input) -> Vec<(usize, usize)> {
         if best_score.chmin(score) {
             best = a.clone();
             best_res = k_lst;
-            println!("best score: {}", score);
-
+            eprintln!("best score: {}", score);
         }
 
         loop {
@@ -377,12 +372,14 @@ pub fn main() {
     Timer::get_time();
     let input = parse_input();
     // println!("{:?}", input);
-    // let res = NFDH_solve(&input);
+    let res = NFDH_solve(&input);
     // let res = BLF_solve(&input);
-    let res = BLF_solve2(&input);
+    // let res = BLF_solve2(&input);
 
     validate_result(&input, &res);
-    // println!("{:?}", res);
-    println!("time:{:?}", Timer::get_time());
+
+    for i in 0..res.len() {
+        println!("{} {}", res[i].0, res[i].1);
+    }
 }
 

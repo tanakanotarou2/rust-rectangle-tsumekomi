@@ -254,25 +254,19 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
             };
         }
 
-        k_lst.push(place);
-
         // 追加した四角形と重なるBL安定点の候補は削除
         {
             let mut it = 0usize;
             while it < bl_lst.len() {
-                let mut ok = true;
-                for k in k_lst.iter() {
-                    if k.x <= bl_lst[it].0 && bl_lst[it].0 < k.right &&
-                        k.y <= bl_lst[it].1 && bl_lst[it].1 < k.top {
-                        bl_lst.swap_remove(it);
-                        ok = false;
-                        break;
-                    }
+                if place.x <= bl_lst[it].0 && bl_lst[it].0 < place.right &&
+                    place.y <= bl_lst[it].1 && bl_lst[it].1 < place.top {
+                    bl_lst.swap_remove(it);
+                } else {
+                    it += 1;
                 }
-                if ok { it += 1; }
             }
         }
-
+        k_lst.push(place);
     }
     k_lst
 }
@@ -372,9 +366,9 @@ pub fn main() {
     Timer::get_time();
     let input = parse_input();
     // println!("{:?}", input);
-    let res = NFDH_solve(&input);
+    // let res = NFDH_solve(&input);
     // let res = BLF_solve(&input);
-    // let res = BLF_solve2(&input);
+    let res = BLF_solve2(&input);
 
     validate_result(&input, &res);
 

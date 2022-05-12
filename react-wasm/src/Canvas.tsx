@@ -4,12 +4,18 @@ type Props = {
     squares: Array<Array<number>> | null
     width: number
     height: number
+    scale:number
 }
 
 
 const Canvas = (props: Props) => {
     const canvasRef = useRef(null);
+
+    const scale=props.scale
     let canvasHeight, canvasWidth;
+
+    const W=props.width*scale;
+    const H=props.height*scale;
 
     let clearCanvas = (context, width, height) => {
         // fill background
@@ -18,18 +24,25 @@ const Canvas = (props: Props) => {
         context.fillRect(0, 0, width, height);
 
         context.fillStyle = 'rgb( 50, 50, 50)';
-        context.fillRect(props.width, 0, width, height);
+        context.fillRect(W, 0, W, H);
         context.save();
     }
 
     let drawRect = (ctx, no, attr) => {
         const [x0, y0, width, height] = attr;
 
+        const x=x0*scale;
+        const y=y0*scale;
+        const w=width*scale;
+        const h=height*scale;
+
+        ctx.fillStyle = 'rgb(158,168,216)'
+        ctx.fillRect(x, canvasHeight - y - h, w, h)
         ctx.strokeStyle = 'rgb( 0, 0, 0)';
-        ctx.strokeRect(x0, canvasHeight - y0 - height, width, height)
+        ctx.strokeRect(x, canvasHeight - y - h, w, h)
 
         ctx.fillStyle = 'rgb( 255, 0, 0)'
-        ctx.fillText(no + "", x0, canvasHeight - y0 - height + 10)
+        ctx.fillText(no + "", x, canvasHeight - y - h + 10)
     }
     const drawSquares = () => {
         if (!canvasRef.current) return;
@@ -38,7 +51,6 @@ const Canvas = (props: Props) => {
         clearCanvas(ctx, canvas.width, canvas.height)
         canvasWidth = canvas.width;
         canvasHeight = canvas.height;
-        console.log("pr", props)
 
         if (!!props.squares && props.squares.length > 0) {
             ctx.font = "12px serif";
@@ -51,7 +63,7 @@ const Canvas = (props: Props) => {
     })
     return (
         <>
-            <canvas ref={canvasRef} width={props.width || 400} height={(props.height || 400) + 10}></canvas>
+            <canvas ref={canvasRef} width={W || 400} height={(H || 400) + 10}></canvas>
         </>
     )
 }

@@ -23,11 +23,11 @@ wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 #serde = { version = "1.0", features = ["derive"] }
 # 乱数
 rand = { version = "=0.7.3", features = ["small_rng"] }
+rand_pcg = "=0.2.1"
 #getrandom = "=0.1.14"
 #rand_chacha = "=0.2.2"
 #rand_core = "=0.5.1"
 #rand_hc = "=0.2.0"
-#rand_pcg = "=0.2.1"
 
 # イテレータの拡張
 itertools = "=0.9.0"

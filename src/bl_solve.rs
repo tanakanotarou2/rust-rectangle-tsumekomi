@@ -115,6 +115,7 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
 
         // すでに配置済の長方形:k と重ならず, 長方形を配置できるBL安定点
         // println!("i:{} {:?}", i, bl_lst);
+        bl_lst.sort_by_key(|(x,y)|(*y,*x));
         for &bp in bl_lst.iter() { // O(bl_pos)
             let i_r = bp.0 + w;
             let i_t = bp.1 + h;
@@ -132,6 +133,7 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
                 if pos.1 > bp.1 || pos.0 > bp.0 {
                     pos = bp;
                 }
+                break;
             }
         }
         assert_ne!(pos.0, !0, "{} {}", i, bl_lst.len());
@@ -157,10 +159,26 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
                 bl_lst.push((k.right, place.top))
             }
         }
-        // TODO:追加した四角形と重なるBL安定点の候補は削除
+        // // TODO:追加した四角形と重なるBL安定点の候補は削除
+        {
+            let mut it=0usize;
+            while it<bl_lst.len() {
+                let mut ok=true;
+                for k in k_lst.iter(){
+                    if k.x<=bl_lst[it].0 && bl_lst[it].0<k.right &&
+                        k.y<=bl_lst[it].1 && bl_lst[it].1<k.top{
+                        bl_lst.swap_remove(it);
+                        ok=false;
+                        break;
+                    }
+                }
+                if ok {it+=1;}
+            }
+        }
 
         k_lst.push(place);
     }
+    println!("bl list:{}",bl_lst.len());
     k_lst
 }
 
@@ -171,14 +189,14 @@ pub fn BLF_solve(input: &Input) -> Vec<(usize, usize)> {
     ids.sort_by_key(|&i| -(a[i].1 as i32));
     a.sort_by_key(|&v| -(v.1 as i32));
     let mut k_lst = BLF_pack(input.w, &a);
-    let score=calc_score(&k_lst);
-    println!("socre: {}",score);
+    let score = calc_score(&k_lst);
+    println!("socre: {}", score);
     k_lst.into_iter().enumerate().sorted_by_key(|(i, _)| ids[*i]).map(|(_, v)| {
         (v.x, v.y)
     }).collect_vec()
 }
 
-fn calc_score(lst:&Vec<Rect>) -> usize {
+fn calc_score(lst: &Vec<Rect>) -> usize {
     lst.iter().map(|v| v.top).max().unwrap()
 }
 
@@ -193,7 +211,9 @@ pub fn BLF_solve2(input: &Input) -> Vec<(usize, usize)> {
     let mut best = a.clone();
     let mut best_score: usize = !0;
     let mut best_res = vec![];
+    let mut iter = 0;
     while Timer::get_time() < LIM {
+        iter += 1;
         let mut k_lst = BLF_pack(input.w, &a);
         let score = calc_score(&k_lst);
 
@@ -201,6 +221,7 @@ pub fn BLF_solve2(input: &Input) -> Vec<(usize, usize)> {
             best = a.clone();
             best_res = k_lst;
         }
+        println!("score: {}", score);
 
         loop {
             if a.len() <= 1 { break; }
@@ -213,16 +234,18 @@ pub fn BLF_solve2(input: &Input) -> Vec<(usize, usize)> {
         }
     }
 
+    let score = calc_score(&best_res);
+    println!("iter:{}, score: {}", iter, score);
     // input の順に並べて返す
     let mut res = vec![];
     let mut used = vec![false; input.a.len()];
     for i in 0..input.a.len() {
-        for j in 0..input.a.len(){
+        for j in 0..input.a.len() {
             if used[j] { continue; }
             let pos = (best_res[j].w, best_res[j].h);
             if input.a[i] == pos {
                 used[j] = true;
-                res.push((best_res[j].x,best_res[j].y));
+                res.push((best_res[j].x, best_res[j].y));
                 break;
             }
         }
@@ -255,9 +278,10 @@ pub fn main() {
     // println!("{:?}", input);
     // let res = NFDH_solve(&input);
     let res = BLF_solve(&input);
+    // let res = BLF_solve2(&input);
 
     validate_result(&input, &res);
-    println!("{:?}", res);
-    println!("time:{:?}",Timer::get_time());
+    // println!("{:?}", res);
+    println!("time:{:?}", Timer::get_time());
 }
 

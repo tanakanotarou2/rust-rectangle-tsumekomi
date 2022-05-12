@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "./static/css/main.03641536.css",
+    "main.css": "./static/css/main.41c3a8fe.css",
     "main.js": "./static/js/main.6250b676.js",
     "static/js/787.3fa25858.chunk.js": "./static/js/787.3fa25858.chunk.js",
     "static/media/rust_tsumekomi_bg.wasm": "./static/media/rust_tsumekomi_bg.6ce291d0a695e537d014.wasm",
     "index.html": "./index.html",
-    "main.03641536.css.map": "./static/css/main.03641536.css.map",
+    "main.41c3a8fe.css.map": "./static/css/main.41c3a8fe.css.map",
     "main.6250b676.js.map": "./static/js/main.6250b676.js.map",
     "787.3fa25858.chunk.js.map": "./static/js/787.3fa25858.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.03641536.css",
+    "static/css/main.41c3a8fe.css",
     "static/js/main.6250b676.js"
   ]
 }

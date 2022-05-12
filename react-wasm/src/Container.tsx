@@ -33,7 +33,7 @@ const parseInputText = (txt: string) => {
     let squares = lines.slice(1).map(v => v.split(" ").map(v => parseInt(v)))
     return {
         n,
-        width:w,
+        width: w,
         squares
     }
 }
@@ -71,27 +71,28 @@ const parseOutputText = (txt: string, inputData): ProblemResult => {
  * などなど
  */
 const Container = () => {
-    const [problemResult, setProblemResult] = useState<ProblemResult>({squares: null, width:0,height: 0})
+    const [problemResult, setProblemResult] = useState<ProblemResult>({squares: null, width: 0, height: 0})
     const [inputValue, setInputValue] = useState<string>("")
     const [outputValue, setOutputValue] = useState<string>("")
 
     const [selAlgo, setSelAlgo] = useState<string>("NF");
+    const [scale, setScale] = useState<number>(1.0);
 
     const runSolver = () => {
         const inp = parseInputText(inputValue);
         const algo = selAlgo;
         const algoFnc = {
-            BLF:BLF_solve,
+            BLF: BLF_solve,
             NFDH: NFDH_solve,
             NF: NF_solve,
         }
         init().then(() => {
             const res = algoFnc[algo](inp);
             console.log(res)
-            const txt=res.pos_list.map(v=>v.join(" ")).join("\n")
+            const txt = res.pos_list.map(v => v.join(" ")).join("\n")
             console.log(txt)
             setOutputValue(txt)
-            bindProblemResult(inputValue,txt)
+            bindProblemResult(inputValue, txt)
         }).catch((e) => {
             console.log(e)
             setOutputValue("invalid input")
@@ -117,14 +118,14 @@ const Container = () => {
         setInputValue(event.target.value)
     }
 
-    const bindProblemResult=(inputText,outputText)=>{
-        try{
+    const bindProblemResult = (inputText, outputText) => {
+        try {
             const inp = parseInputText(inputValue)
             const parseData = parseOutputText(outputText, inp)
             console.log(parseData)
             setProblemResult(parseData)
-        }catch (e){
-            setProblemResult({height:0, width:0, squares:[]})
+        } catch (e) {
+            setProblemResult({height: 0, width: 0, squares: []})
             console.log(e);
         }
     }
@@ -135,15 +136,7 @@ const Container = () => {
         txt = txt.trim();
         if (!txt || txt.length === 0) return
 
-        bindProblemResult(inputValue,event.target.value)
-    }
-
-    const _label_style = {
-        margin: "5px auto",
-        backgroundColor: "white",
-        color: "black",
-        width: 400
-        // width: ((dataset.width < 400) ? 400 : dataset.width) + "px",
+        bindProblemResult(inputValue, event.target.value)
     }
     const input_placeholder = "N W\nw1 h1\nw2 h2"
     const output_placeholder = "x1 y1\nx2 y2"
@@ -155,8 +148,9 @@ const Container = () => {
                     <div className="input">
                         <div>
                             <div>
-                            <label htmlFor="inp">入力データ</label>
-                            (<a href={"https://github.com/tanakanotarou2/rust-rectangle-tsumekomi/blob/main/docs/mondai.md#%E5%85%A5%E5%87%BA%E5%8A%9B"} >入出力説明</a>)
+                                <label htmlFor="inp">入力データ</label>
+                                (<a
+                                href={"https://github.com/tanakanotarou2/rust-rectangle-tsumekomi/blob/main/docs/mondai.md#%E5%85%A5%E5%87%BA%E5%8A%9B"}>入出力説明</a>)
                             </div>
                             <textarea id="inp"
                                       name="inp"
@@ -204,7 +198,8 @@ const Container = () => {
                             type="radio"
                             value="BLF"
                             checked={selAlgo === "BLF"}
-                            onChange={() => changeAlgo("BLF")}
+                            onChange={() => changeAlgo("BLF")
+                            }
                         />
                         BLF法
                     </label>
@@ -213,8 +208,17 @@ const Container = () => {
             </div>
             {/* end left panel */}
             <div>
-                <div style={_label_style}>height: {problemResult.height}</div>
-                <Canvas {...problemResult}/>
+                <div className={"canvas-header"}>
+                    <div className={'label'}>height: {problemResult.height}</div>
+                    <div>
+                        <label>scale: </label>
+                        <input type="number" placeholder="1.0" step="0.05" min="0.25" max="5.0"
+                               value={scale}
+                               onChange={(v) => setScale(() => Number(v.target.value))}
+                        />
+                    </div>
+                </div>
+                <Canvas scale={scale} {...problemResult}/>
             </div>
         </>
     )

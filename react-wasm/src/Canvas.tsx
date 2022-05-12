@@ -25,6 +25,8 @@ const Canvas = (props: Props) => {
     let drawRect = (ctx, no, attr) => {
         const [x0, y0, width, height] = attr;
 
+        ctx.fillStyle = 'rgb(158,168,216)'
+        ctx.fillRect(x0, canvasHeight - y0 - height, width, height)
         ctx.strokeStyle = 'rgb( 0, 0, 0)';
         ctx.strokeRect(x0, canvasHeight - y0 - height, width, height)
 
@@ -38,7 +40,6 @@ const Canvas = (props: Props) => {
         clearCanvas(ctx, canvas.width, canvas.height)
         canvasWidth = canvas.width;
         canvasHeight = canvas.height;
-        console.log("pr", props)
 
         if (!!props.squares && props.squares.length > 0) {
             ctx.font = "12px serif";

@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::collections::hash_map::Entry;
 use std::ops::{Index, IndexMut};
 use itertools::{concat, Itertools};
@@ -107,6 +108,12 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
     // 配置済の長方形(k)
     let mut k_lst: Vec<Rect> = vec![]; // x, y, x+w, y+h;
 
+    let mut v_lines: Vec<(usize, usize, usize)> = vec![]; // (x, bottom, top);
+    let mut h_lines: Vec<(usize, usize, usize)> = vec![]; // (y, left, right);
+
+    v_lines.push((0, 0, 1000_000));
+    h_lines.push((0, 0, W));
+
     for i in 0..a.len() {
         let (w, h) = a[i];
 
@@ -115,7 +122,7 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
 
         // すでに配置済の長方形:k と重ならず, 長方形を配置できるBL安定点
         // println!("i:{} {:?}", i, bl_lst);
-        bl_lst.sort_by_key(|(x,y)|(*y,*x));
+        bl_lst.sort_by_key(|(x, y)| (*y, *x));
         for &bp in bl_lst.iter() { // O(bl_pos)
             let i_r = bp.0 + w;
             let i_t = bp.1 + h;
@@ -141,44 +148,136 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
         let mut place = Rect::new(pos.0, pos.1, w, h);
         // println!("selected place:{:?}", place);
 
-        // 新しいBL安定点候補を追加 O(N)
-        //母材と長方形iのBL安定点
-        bl_lst.push((place.right, 0));
-        bl_lst.push((0, place.top));
 
-        for k in k_lst.iter() {
-            // k.top の左方向へのBL安定点
-            // 長方形 i が 長方形 k より上、左側にある場合、BL安定点を追加
-            if place.right < k.right && place.top > k.top {
-                bl_lst.push((place.right, k.top))
-            }
-
-            // k.right の下方向へのBL安定点
-            // 長方形 i が 長方形 k より下、右側にある場合、BL安定点を追加
-            if place.top < k.top && place.right > k.right {
-                bl_lst.push((k.right, place.top))
-            }
-        }
-        // // TODO:追加した四角形と重なるBL安定点の候補は削除
+        // 横line
         {
-            let mut it=0usize;
-            while it<bl_lst.len() {
-                let mut ok=true;
-                for k in k_lst.iter(){
-                    if k.x<=bl_lst[it].0 && bl_lst[it].0<k.right &&
-                        k.y<=bl_lst[it].1 && bl_lst[it].1<k.top{
-                        bl_lst.swap_remove(it);
-                        ok=false;
-                        break;
+            // line の縮小
+            for v in h_lines.iter_mut().filter(|line| {
+                place.y <= line.0 && line.0 <= place.top &&
+                    place.x < line.2 && line.1 < place.right // x座標の端点は重なるものは残して良い
+            }) {
+                let (y, l, r) = *v;
+                let mut new_v = (y, l, r);
+                if place.right >= l {
+                    new_v.1 = place.right;
+                }
+                *v = new_v;
+            }
+            // 不要になった line の削除
+            {
+                let mut it = 0usize;
+                while it < h_lines.len() {
+                    if h_lines[it].1 >= h_lines[it].2 {
+                        h_lines.swap_remove(it);
+                    } else {
+                        it += 1;
                     }
                 }
-                if ok {it+=1;}
             }
+            // 新しいBL安定点探索用のline 追加
+            if let Some(line) =
+            {
+                let mut line = (place.top, 0, place.right);
+                for k in k_lst.iter() {
+                    let (y, mut l, r) = line;
+                    if k.y <= y && y <= k.top {
+                        if k.x <= r {
+                            l.chmax(k.right);
+                        }
+                    }
+                    line = (y, l, r);
+                    if l >= r { break; }
+                }
+                if line.1 >= line.2 {
+                    None
+                } else {
+                    Some(line)
+                }
+            } {
+                // 既存のlineとの交差点を候補に追加
+                for &(x, b, t) in v_lines.iter() {
+                    if b <= line.0 && line.0 <= t && line.1 <= x && x <= line.2 {
+                        bl_lst.push((x, line.0))
+                    }
+                }
+                h_lines.push(line);
+            };
+        }
+
+        // 縦line
+        {
+            // line の縮小
+            for v in v_lines.iter_mut().filter(|line| {
+                place.x <= line.0 && line.0 <= place.right &&
+                    place.y < line.2 && line.1 < place.top // y軸の端点は重なるものは残して良い
+            }) {
+                let (x, l, r) = *v;
+                let mut new_v = (x, l, r);
+                new_v.1.chmax(place.top);
+                *v = new_v;
+            }
+            // 不要になった line の削除
+            {
+                let mut it = 0usize;
+                while it < v_lines.len() {
+                    if v_lines[it].1 >= v_lines[it].2 {
+                        v_lines.swap_remove(it);
+                    } else {
+                        it += 1;
+                    }
+                }
+            }
+            // 新しいBL安定点探索用のline 追加
+            if let Some(line) =
+            {
+                let mut line = (place.right, 0, place.top);
+                for k in k_lst.iter() {
+                    let (x, mut b, t) = line;
+                    if k.x <= x && x <= k.right {
+                        if k.y <= t {
+                            b.chmax(k.top);
+                        }
+                    }
+                    line = (x, b, t);
+                    if b >= t { break; }
+                }
+                if line.1 >= line.2 {
+                    None
+                } else {
+                    Some(line)
+                }
+            } {
+                // 既存のlineとの交差点を候補に追加
+                for &(y, l, r) in h_lines.iter() {
+                    if l <= line.0 && line.0 <= r && line.1 <= y && y <= line.2 {
+                        bl_lst.push((line.0, y))
+                    }
+                }
+                v_lines.push(line);
+            };
         }
 
         k_lst.push(place);
+
+        // 追加した四角形と重なるBL安定点の候補は削除
+        {
+            let mut it = 0usize;
+            while it < bl_lst.len() {
+                let mut ok = true;
+                for k in k_lst.iter() {
+                    if k.x <= bl_lst[it].0 && bl_lst[it].0 < k.right &&
+                        k.y <= bl_lst[it].1 && bl_lst[it].1 < k.top {
+                        bl_lst.swap_remove(it);
+                        ok = false;
+                        break;
+                    }
+                }
+                if ok { it += 1; }
+            }
+        }
+
     }
-    println!("bl list:{}",bl_lst.len());
+    // println!("bl list:{}", bl_lst.len());
     k_lst
 }
 
@@ -213,6 +312,7 @@ pub fn BLF_solve2(input: &Input) -> Vec<(usize, usize)> {
     let mut best_res = vec![];
     let mut iter = 0;
     while Timer::get_time() < LIM {
+        if iter>1{break;}
         iter += 1;
         let mut k_lst = BLF_pack(input.w, &a);
         let score = calc_score(&k_lst);
@@ -220,8 +320,9 @@ pub fn BLF_solve2(input: &Input) -> Vec<(usize, usize)> {
         if best_score.chmin(score) {
             best = a.clone();
             best_res = k_lst;
+            println!("best score: {}", score);
+
         }
-        println!("score: {}", score);
 
         loop {
             if a.len() <= 1 { break; }
@@ -277,8 +378,8 @@ pub fn main() {
     let input = parse_input();
     // println!("{:?}", input);
     // let res = NFDH_solve(&input);
-    let res = BLF_solve(&input);
-    // let res = BLF_solve2(&input);
+    // let res = BLF_solve(&input);
+    let res = BLF_solve2(&input);
 
     validate_result(&input, &res);
     // println!("{:?}", res);

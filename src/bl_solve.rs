@@ -3,7 +3,7 @@ use std::collections::hash_map::Entry;
 use std::ops::{Index, IndexMut};
 use itertools::{concat, Itertools};
 // use rand_pcg::Mcg128Xsl64;
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 use rand_pcg::Mcg128Xsl64;
 use rand::prelude::SliceRandom;
 use proconio::{*};
@@ -98,12 +98,14 @@ impl Rect {
     }
 }
 
-
 /**
  * 与えられた順に詰め込む
  */
 fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
-    let mut bl_lst = vec![(0usize, 0usize)]; // BL安定点の候補のリスト
+
+    // BL安定点候補の set. タプル: (y, x) を記録
+    let mut bl_lst: BTreeSet<(usize, usize)> = BTreeSet::new();
+    bl_lst.insert((0, 0));
 
     // 配置済の長方形(k)
     let mut k_lst: Vec<Rect> = vec![]; // x, y, x+w, y+h;
@@ -118,20 +120,19 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
         let (w, h) = a[i];
 
         // BL安定点の中から配置できる最も右下の座標を探す
-        let mut pos: (usize, usize) = (!0, !0);
+        let mut pos: (usize, usize) = (!0, !0); // (y, x) の順にとることに注意
 
         // すでに配置済の長方形:k と重ならず, 長方形を配置できるBL安定点
-        bl_lst.sort_by_key(|(x, y)| (*y, *x));
         for &bp in bl_lst.iter() { // O(bl_pos)
-            let i_r = bp.0 + w;
-            let i_t = bp.1 + h;
+            let i_r = bp.1 + w;
+            let i_t = bp.0 + h;
             if i_r > W { continue; }
 
             // O(N)
             if k_lst.iter().all(|k| {
                 // 区間重複
-                let x = bp.0 < k.right && k.x < i_r;
-                let y = bp.1 < k.top && k.y < i_t;
+                let x = bp.1 < k.right && k.x < i_r;
+                let y = bp.0 < k.top && k.y < i_t;
                 // x、y座標いずれか満たさなければOK
                 return !x || !y;
             }) {
@@ -144,7 +145,7 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
         }
         assert_ne!(pos.0, !0, "{} {}", i, bl_lst.len());
         // 配置する区画
-        let mut place = Rect::new(pos.0, pos.1, w, h);
+        let mut place = Rect::new(pos.1, pos.0, w, h);
 
         // 横line
         {
@@ -193,8 +194,8 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
             } {
                 // 既存のlineとの交差点を候補に追加
                 for &(x, b, t) in v_lines.iter() {
-                    if b <= line.0 && line.0 <= t && line.1 <= x && x <= line.2 {
-                        bl_lst.push((x, line.0))
+                    if b <= line.0 && line.0 <= t && line.1 <= x && x < line.2 {
+                        bl_lst.insert((line.0, x));
                     }
                 }
                 h_lines.push(line);
@@ -246,8 +247,8 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
             } {
                 // 既存のlineとの交差点を候補に追加
                 for &(y, l, r) in h_lines.iter() {
-                    if l <= line.0 && line.0 <= r && line.1 <= y && y <= line.2 {
-                        bl_lst.push((line.0, y))
+                    if l <= line.0 && line.0 <= r && line.1 <= y && y < line.2 {
+                        bl_lst.insert((y, line.0));
                     }
                 }
                 v_lines.push(line);
@@ -257,18 +258,25 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
         // 追加した四角形と重なるBL安定点の候補は削除
         {
             let mut it = 0usize;
-            while it < bl_lst.len() {
-                if place.x <= bl_lst[it].0 && bl_lst[it].0 < place.right &&
-                    place.y <= bl_lst[it].1 && bl_lst[it].1 < place.top {
-                    bl_lst.swap_remove(it);
-                } else {
-                    it += 1;
+            let mut drops = vec![];
+            let presize = bl_lst.len();
+            for &v in bl_lst.iter() {
+                if place.x <= v.1 && v.1 < place.right &&
+                    place.y <= v.0 && v.0 < place.top {
+                    drops.push(v);
                 }
             }
+            let mut dropsize = drops.len();
+            assert_ne!(dropsize, 0);
+            for v in drops {
+                bl_lst.remove(&v);
+            }
+            assert_eq!(bl_lst.len(), presize - dropsize);
         }
         k_lst.push(place);
     }
     k_lst
+
 }
 
 
@@ -363,17 +371,17 @@ fn validate_result(input: &Input, res: &Vec<(usize, usize)>) -> bool {
 }
 
 pub fn main() {
-    Timer::get_time();
+    let st = Timer::get_time();
     let input = parse_input();
-    // println!("{:?}", input);
-    // let res = NFDH_solve(&input);
-    // let res = BLF_solve(&input);
-    let res = BLF_solve2(&input);
+    let res = BLF_solve(&input);
+    // let res = BLF_solve2(&input);
 
     validate_result(&input, &res);
 
-    for i in 0..res.len() {
-        println!("{} {}", res[i].0, res[i].1);
-    }
+    // for i in 0..res.len() {
+    //     println!("{} {}", res[i].0, res[i].1);
+    // }
+    let end = Timer::get_time();
+    println!("end-st: {}", end - st);
 }
 

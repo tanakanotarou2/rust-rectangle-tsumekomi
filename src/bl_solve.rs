@@ -123,7 +123,6 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
         let mut pos: (usize, usize) = (!0, !0); // (y, x) の順にとることに注意
 
         // すでに配置済の長方形:k と重ならず, 長方形を配置できるBL安定点
-        // bl_lst.sort_by_key(|(x, y)| (*y, *x));
         for &bp in bl_lst.iter() { // O(bl_pos)
             let i_r = bp.1 + w;
             let i_t = bp.0 + h;
@@ -275,9 +274,6 @@ fn BLF_pack(W: usize, a: &Vec<(usize, usize)>) -> Vec<Rect> {
             assert_eq!(bl_lst.len(), presize - dropsize);
         }
         k_lst.push(place);
-        // eprintln!("bl_lst:{}",bl_lst.len());
-        // println!("{:?}", bl_lst);
-        // break;
     }
     k_lst
 
@@ -377,8 +373,6 @@ fn validate_result(input: &Input, res: &Vec<(usize, usize)>) -> bool {
 pub fn main() {
     let st = Timer::get_time();
     let input = parse_input();
-    // println!("{:?}", input);
-    // let res = NFDH_solve(&input);
     let res = BLF_solve(&input);
     // let res = BLF_solve2(&input);
 
